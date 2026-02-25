@@ -1,0 +1,35 @@
+{
+  "Patient": {
+    "type": "object",
+    "required": ["patient_id", "patient_login", "created_at"],
+    "properties": {
+      "patient_id": { "type": "string", "description": null },
+      "patient_login": { "type": "string", "description": null },
+      "email": { "type": "string", "description": null },
+      "created_at": { "type": "string", "description": null }
+    }
+  },
+  "Observation": {
+    "type": "object",
+    "required": ["observation_id", "patient_id", "patient_login", "score", "created_at"],
+    "properties": {
+      "observation_id": { "type": "string", "description": null },
+      "patient_id": { "type": "string", "description": null },
+      "patient_login": { "type": "string", "description": null },
+      "score": { "type": "number", "description": null },
+      "created_at": { "type": "string", "description": null }
+    }
+  },
+  "Alert": {
+    "type": "object",
+    "required": ["alert_id", "patient_id", "patient_login", "score", "message", "created_at"],
+    "properties": {
+      "alert_id": { "type": "string", "description": null },
+      "patient_id": { "type": "string", "description": null },
+      "patient_login": { "type": "string", "description": null },
+      "score": { "type": "number", "description": null },
+      "message": { "type": "string", "description": null },
+      "created_at": { "type": "string", "description": null }
+    }
+  }
+}

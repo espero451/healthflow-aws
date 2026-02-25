@@ -1,0 +1,15 @@
+services:
+  localstack:
+    image: localstack/localstack:3.2
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=apigateway,lambda,dynamodb,events,sqs,iam,logs,sts,cloudformation,ssm,s3
+      - DEBUG=0
+      - LOCALSTACK_HOSTNAME=localhost
+      - HOSTNAME_EXTERNAL=localhost
+      - S3_ENDPOINT_STRATEGY=path
+      - S3_HOSTNAME=localhost
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./localstack:/var/lib/localstack
