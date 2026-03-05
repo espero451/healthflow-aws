@@ -92,14 +92,6 @@ export class HealthflowStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10)
     });
 
-    const patientCommand = new lambda.Function(this, "PatientCommandLambda", {
-      runtime: lambda.Runtime.PYTHON_3_11,
-      handler: "patient_command.handler.lambda_handler",
-      code: lambdaCode,
-      environment: baseEnv,
-      timeout: cdk.Duration.seconds(10)
-    });
-
     const observationCommand = new lambda.Function(this, "ObservationCommandLambda", {
       runtime: lambda.Runtime.PYTHON_3_11,
       handler: "observation_command.handler.lambda_handler",
@@ -154,9 +146,6 @@ export class HealthflowStack extends cdk.Stack {
     usersTable.grantReadWriteData(authLambda);
     eventBus.grantPutEventsTo(authLambda);
 
-    eventsTable.grantWriteData(patientCommand);
-    eventBus.grantPutEventsTo(patientCommand);
-
     eventsTable.grantWriteData(observationCommand);
     eventBus.grantPutEventsTo(observationCommand);
 
@@ -194,9 +183,6 @@ export class HealthflowStack extends cdk.Stack {
           authorizationType: apigw.AuthorizationType.CUSTOM
         }
       : undefined;
-
-    const patients = api.root.addResource("patients");
-    patients.addMethod("POST", new apigw.LambdaIntegration(patientCommand), authOptions);
 
     const observations = api.root.addResource("observations");
     observations.addMethod("POST", new apigw.LambdaIntegration(observationCommand), authOptions);
