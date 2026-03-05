@@ -13,7 +13,11 @@ export class HealthflowStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // --- Configuration -----------------------------------------------
+
     const localstackEndpoint = process.env.LOCALSTACK_ENDPOINT ?? "";
+
+    // --- Data Stores -------------------------------------------------
 
     const eventBus = new events.EventBus(this, "HealthflowBus", {
       eventBusName: "healthflow-bus"
@@ -54,10 +58,14 @@ export class HealthflowStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
+    // --- Queue -------------------------------------------------------
+
     const queue = new sqs.Queue(this, "ObservationQueue", {
       queueName: "healthflow-observation-queue",
       visibilityTimeout: cdk.Duration.seconds(30)
     });
+
+    // --- Lambda Code -------------------------------------------------
 
     const lambdaCode = lambda.Code.fromAsset(path.join(__dirname, "../../services"));
 
@@ -75,6 +83,8 @@ export class HealthflowStack extends cdk.Stack {
     if (localstackEndpoint) {
       baseEnv.AWS_ENDPOINT_URL = localstackEndpoint;
     }
+
+    // --- Lambda Functions --------------------------------------------
 
     const authLambda = new lambda.Function(this, "AuthLambda", {
       runtime: lambda.Runtime.PYTHON_3_11,
@@ -142,6 +152,8 @@ export class HealthflowStack extends cdk.Stack {
 
     alertWorker.addEventSource(new lambdaEventSources.SqsEventSource(queue, { batchSize: 5 }));
 
+    // --- Permissions -------------------------------------------------
+
     eventsTable.grantWriteData(authLambda);
     usersTable.grantReadWriteData(authLambda);
     eventBus.grantPutEventsTo(authLambda);
@@ -160,6 +172,8 @@ export class HealthflowStack extends cdk.Stack {
 
     usersTable.grantReadData(queryAlerts);
     patientsTable.grantReadData(queryAlerts);
+
+    // --- API Endpoints -----------------------------------------------
 
     const api = new apigw.RestApi(this, "HealthflowApi", {
       restApiName: "healthflow-api",
@@ -190,6 +204,8 @@ export class HealthflowStack extends cdk.Stack {
     const alerts = api.root.addResource("alerts");
     alerts.addMethod("GET", new apigw.LambdaIntegration(queryAlerts), authOptions);
 
+    // --- Event Rules -------------------------------------------------
+
     new events.Rule(this, "PatientCreatedRule", {
       eventBus,
       eventPattern: { detailType: ["PatientCreated"] },
@@ -213,6 +229,8 @@ export class HealthflowStack extends cdk.Stack {
       eventPattern: { detailType: ["AlertCreated"] },
       targets: [new targets.LambdaFunction(projectionAlert)]
     });
+
+    // --- Outputs -----------------------------------------------------
 
     new cdk.CfnOutput(this, "ApiName", { value: api.restApiName });
   }
