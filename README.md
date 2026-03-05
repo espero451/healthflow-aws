@@ -17,15 +17,6 @@ Experimental healthcare workflow demo replicating an AWS-style event-driven arch
                                         [DynamoDB]
 ```
 
-<!-- ### What matches DearHealth
-
-- Event-driven microservices style with API Gateway, Lambda, EventBridge, SQS, DynamoDB.
-- Infrastructure as code with AWS CDK and TypeScript.
-- CQRS-style projections and event store in DynamoDB.
-- Model Definition framework in TypeScript (minimal demo).
-- Playwright e2e/API tests.
-- React patient + clinician UIs. -->
-
 ### Project Structure
 
 ```
@@ -35,8 +26,6 @@ healthflow-aws/
   services/               # Lambda handlers + shared Python helpers
   frontend/               # React patient + clinician apps (Vite)
   tools/                  # Local dev helpers (API URL, seed users, run fronts)
-  model-defs/             # Minimal model definition framework demo
-  tests/                  # Playwright e2e/API tests
 ```
 
 ## Prerequisites
@@ -83,6 +72,7 @@ python3 scripts/seed_clinician.py
 bash scripts/run_frontends.sh
 ``` -->
 
+<!--
 ### Run Playwright tests
 
 ```bash
@@ -94,14 +84,7 @@ npm install
 npx playwright install
 npm run test
 ```
-
-### Model Definition framework
-
-```bash
-cd model-defs
-npm install
-npm run generate
-```
+-->
 
 ### Notes
 
