@@ -14,14 +14,14 @@ export VITE_API_BASE_URL="${API_URL}"
 echo "Using API URL: ${VITE_API_BASE_URL}"
 
 (
-  cd "${ROOT_DIR}/frontend/patient"
-  npm run dev
+  cd "${ROOT_DIR}/frontend"
+  npm --workspace patient run dev
 ) &
 PATIENT_PID=$!
 
 (
-  cd "${ROOT_DIR}/frontend/clinician"
-  npm run dev
+  cd "${ROOT_DIR}/frontend"
+  npm --workspace clinician run dev
 ) &
 CLINICIAN_PID=$!
 

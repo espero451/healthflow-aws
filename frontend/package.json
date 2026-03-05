@@ -1,0 +1,8 @@
+{
+  "name": "healthflow-aws-frontend",
+  "private": true,
+  "workspaces": [
+    "clinician",
+    "patient"
+  ]
+}
