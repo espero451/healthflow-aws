@@ -2,21 +2,7 @@
 
 This project demonstrates a minimal event-driven backend architecture on AWS using serverless components. The entire stack runs locally using [LocalStack](https://github.com/localstack/localstack), allowing the system to be deployed and tested without accessing real AWS account.
 
-Stack:
-* AWS Lambda
-* API Gateway
-* EventBridge
-* SQS
-* DynamoDB
-* Infrastructure as Code with AWS CDK (TypeScript)
-
-The backend is implemented in Python and follows architectural patterns such as:
-
-* CQRS
-* Event Sourcing
-* Asynchronous message processing
-
-## Architecture Overview
+# Architecture
 
 Commands are handled by Lambda functions which generate **domain events**.
 These events are stored in DynamoDB and published to **EventBridge**, which distributes them to projections and asynchronous workers.
@@ -78,9 +64,54 @@ QueryAlerts --> Alerts
 QueryAlerts --> Patients
 ```
 
-## Example Event Flow
+# Project Structure
 
-**Example scenario: a patient submits an observation.**
+```
+healthflow-aws
+│
+├── infra
+│   ├── bin
+│   │   └── healthflow.ts
+│   └── lib
+│       └── healthflow-stack.ts
+│
+├── services
+│   ├── auth
+│   ├── observation_command
+│   ├── alert_worker
+│   ├── projection_patient
+│   ├── projection_observation
+│   ├── projection_alert
+│   └── shared
+│
+├── frontend
+│   ├── patient
+│   └── clinician
+│
+└── tools
+```
+
+## Infrastructure (AWS CDK)
+
+Infrastructure is defined using **AWS CDK with TypeScript**.
+
+Main stack:
+
+```
+infra/lib/healthflow-stack.ts
+```
+
+The CDK stack creates:
+
+* API Gateway
+* Lambda functions
+* EventBridge bus
+* SQS queue
+* DynamoDB tables
+
+## 💡 Example Event Flow
+
+Example scenario: a patient submits an observation.
 
 1. Patient sends `POST /observations`
 2. **API Gateway** invokes `ObservationCommand` Lambda
@@ -125,6 +156,19 @@ Each Lambda is focused on a single responsibility.
 | projection_observation | builds observation read model         |
 | projection_alert       | builds alert read model               |
 | query_alerts           | returns alerts for clinicians         |
+
+## Shared Library
+
+The `services/shared` module contains reusable helpers used by multiple Lambdas.
+
+| Module   | Purpose                              |
+| -------- | ------------------------------------ |
+| aws      | boto3 helpers and LocalStack support |
+| auth     | JWT token creation and validation    |
+| events   | event building and publishing        |
+| request  | API Gateway request parsing          |
+| response | API Gateway response formatting      |
+| config   | environment configuration            |
 
 ## DynamoDB
 
@@ -193,79 +237,7 @@ GET /alerts
   -> alerts read model from DynamoDB
 ```
 
-# Project Structure
-
-```
-healthflow-aws
-│
-├── infra
-│   ├── bin
-│   │   └── healthflow.ts
-│   └── lib
-│       └── healthflow-stack.ts
-│
-├── services
-│   ├── auth
-│   ├── observation_command
-│   ├── alert_worker
-│   ├── projection_patient
-│   ├── projection_observation
-│   ├── projection_alert
-│   └── shared
-│
-├── frontend
-│   ├── patient
-│   └── clinician
-│
-└── tools
-```
-
-## Infrastructure (AWS CDK)
-
-Infrastructure is defined using **AWS CDK with TypeScript**.
-
-Main stack:
-
-```
-infra/lib/healthflow-stack.ts
-```
-
-The CDK stack creates:
-
-* API Gateway
-* Lambda functions
-* EventBridge bus
-* SQS queue
-* DynamoDB tables
-
-## Shared Library
-
-The `services/shared` module contains reusable helpers used by multiple Lambdas.
-
-Modules:
-
-```
-shared/
-    aws.py
-    auth.py
-    events.py
-    request.py
-    response.py
-    config.py
-```
-
-Responsibilities:
-
-| Module   | Purpose                              |
-| -------- | ------------------------------------ |
-| aws      | boto3 helpers and LocalStack support |
-| auth     | JWT token creation and validation    |
-| events   | event building and publishing        |
-| request  | API Gateway request parsing          |
-| response | API Gateway response formatting      |
-| config   | environment configuration            |
-
-## Running
+# Running
 
 The project includes helper script in `./tools/` that start the entire local environment. `deploy.sh` script performs the following steps:
 
