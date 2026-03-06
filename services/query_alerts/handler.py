@@ -50,7 +50,7 @@ def _attach_patient_login(alerts: list[dict]) -> list[dict]:
 def lambda_handler(event: dict, context: dict) -> dict:
     # Return the alert read model for clinicians.
     table = resource("dynamodb").Table(ALERTS_TABLE)
-    result = table.scan()
+    result = table.scan() # For demo simplicity we scan the table
     items = _sort_alerts(result.get("Items", []))
     items = _attach_patient_login(items)
     return response(200, {"alerts": items})
