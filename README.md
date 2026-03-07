@@ -5,7 +5,7 @@ This project demonstrates a minimal event-driven backend architecture on AWS usi
 # Architecture
 
 Commands are handled by Lambda functions which generate **domain events**.
-These events are stored in DynamoDB and published to **EventBridge**, which distributes them to projections and asynchronous workers.
+These events are stored in DynamoDB and distributed through **EventBridge** to projections and asynchronous workers.
 
 ## Architecture Diagram
 
@@ -13,26 +13,34 @@ These events are stored in DynamoDB and published to **EventBridge**, which dist
 flowchart LR
 
 Client[Client Apps]
-
 APIGateway[API Gateway]
 
-AuthLambda[Auth Lambda]
-ObservationCommand[Observation Command Lambda]
-QueryAlerts[Query Alerts Lambda]
+subgraph Commands
+  AuthLambda[Auth Lambda]
+  ObservationCommand[Observation Command Lambda]
+end
+
+subgraph Queries
+  QueryAlerts[Query Alerts Lambda]
+end
 
 EventStore[(DynamoDB Events Table)]
 EventBridge[(EventBridge Bus)]
 
-PatientProjection[Patient Projection Lambda]
-ObservationProjection[Observation Projection Lambda]
-AlertProjection[Alert Projection Lambda]
+subgraph Projections
+  PatientProjection[Patient Projection Lambda]
+  ObservationProjection[Observation Projection Lambda]
+  AlertProjection[Alert Projection Lambda]
+end
 
 SQSQueue[(SQS Queue)]
 AlertWorker[Alert Worker Lambda]
 
-Patients[(Patients Table)]
-Observations[(Observations Table)]
-Alerts[(Alerts Table)]
+subgraph ReadModels
+  Patients[(Patients Table)]
+  Observations[(Observations Table)]
+  Alerts[(Alerts Table)]
+end
 
 Client --> APIGateway
 
@@ -64,7 +72,7 @@ QueryAlerts --> Alerts
 QueryAlerts --> Patients
 ```
 
-# Project Structure
+## Project Structure
 
 ```
 healthflow-aws
@@ -93,13 +101,7 @@ healthflow-aws
 
 ## Infrastructure (AWS CDK)
 
-Infrastructure is defined using **AWS CDK with TypeScript**.
-
-Main stack:
-
-```
-infra/lib/healthflow-stack.ts
-```
+Infrastructure is defined using **AWS CDK with TypeScript** in `infra/lib/healthflow-stack.ts`.
 
 The CDK stack creates:
 
@@ -119,7 +121,6 @@ Example scenario: a patient submits an observation.
 4. Event is stored in **DynamoDB event store**
 5. Event is published to **EventBridge**
 6. EventBridge distributes the event to:
-
    * Observation projection
    * SQS queue
 7. **Alert worker** processes the observation asynchronously
@@ -203,20 +204,13 @@ AlertCreated
 ## SQS
 
 SQS is used for **asynchronous processing**.
+This allows long-running logic to be processed outside of the request path.
 
 Example flow:
 
 ```
-ObservationSubmitted
-         ↓
-     EventBridge
-         ↓
-        SQS
-         ↓
-    Alert Worker
+ObservationSubmitted -> EventBridge -> SQS -> Alert Worker
 ```
-
-This allows long-running logic to be processed outside of the request path.
 
 ## CQRS + Event Sourcing
 
@@ -237,9 +231,23 @@ GET /alerts
   -> alerts read model from DynamoDB
 ```
 
-# Running
+# Installation
 
-The project includes helper script in `./tools/` that start the entire local environment. `deploy.sh` script performs the following steps:
+## Prerequisites
+
+* Python 3.11+
+* Docker
+* Node.js + npm
+* AWS CLI
+* awscli-local (`awslocal`)
+* LocalStack CLI (`localstack`, `cdklocal`)
+
+LocalStack runs AWS services locally using Docker containers.
+The helper tools `awslocal` and `cdklocal` are used by the project scripts in `./tools/`.
+
+## Running
+
+The project includes helper scripts in `./tools/` that start the entire local environment. `deploy.sh` script performs the following steps:
 
 1. Reset LocalStack containers
 2. Start LocalStack with Docker
@@ -260,7 +268,6 @@ Run:
 | Patient UI           | http://localhost:5173        |
 | Clinician UI         | http://localhost:5174        |
 | LocalStack Dashboard | https://app.localstack.cloud |
-
 
 ### Demo Credentials
 
