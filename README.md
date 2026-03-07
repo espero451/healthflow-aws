@@ -85,11 +85,13 @@ healthflow-aws
 │
 ├── services
 │   ├── auth
-│   ├── observation_command
 │   ├── alert_worker
+│   ├── authorizer
+│   ├── observation_command
+│   ├── projection_alert
 │   ├── projection_patient
 │   ├── projection_observation
-│   ├── projection_alert
+│   ├── query_alerts
 │   └── shared
 │
 ├── frontend
