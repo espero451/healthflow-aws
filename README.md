@@ -7,12 +7,6 @@ This project demonstrates a minimal event-driven backend architecture on AWS usi
 Commands are handled by Lambda functions which generate **domain events**.
 These events are stored in DynamoDB and distributed through **EventBridge** to projections and asynchronous workers.
 
-## Event Ordering and Consistency
-
-Since events are propagated asynchronously through EventBridge and SQS, the system is designed to be eventually consistent.
-
-Read models are updated by projections and may temporarily lag behind the event store, which is considered the source of truth.
-
 ## Architecture Diagram
 
 ```mermaid
