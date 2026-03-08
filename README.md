@@ -7,6 +7,12 @@ This project demonstrates a minimal event-driven backend architecture on AWS usi
 Commands are handled by Lambda functions which generate **domain events**.
 These events are stored in DynamoDB and distributed through **EventBridge** to projections and asynchronous workers.
 
+## Event Ordering and Consistency
+
+Since events are propagated asynchronously through EventBridge and SQS, the system is designed to be eventually consistent.
+
+Read models are updated by projections and may temporarily lag behind the event store, which is considered the source of truth.
+
 ## Architecture Diagram
 
 ```mermaid
@@ -145,6 +151,28 @@ POST /observations
 GET /alerts
 ```
 
+## CQRS + Event Sourcing
+
+Command and query responsibilities are separated.
+Commands generate domain events which are stored in the DynamoDB event store and published to EventBridge.
+Events stored in DynamoDB form the immutable event log of the system.
+All projections and read models are derived from this event stream and can be rebuilt by replaying stored events.
+
+```
+POST /observations
+  -> ObservationCommand Lambda
+  -> ObservationSubmitted event
+  -> stored in events DynamoDB table
+  -> published to EventBridge
+```
+
+Projections build read models used by queries:
+```
+GET /alerts
+  -> QueryAlerts Lambda
+  -> alerts read model from DynamoDB
+```
+
 ## Lambda Microservices
 
 Each service is implemented as a small Python Lambda (`./services/`).
@@ -212,25 +240,6 @@ Example flow:
 
 ```
 ObservationSubmitted -> EventBridge -> SQS -> Alert Worker
-```
-
-## CQRS + Event Sourcing
-
-Command and query responsibilities are separated.
-Commands generate domain events which are stored in DynamoDB and published to EventBridge.
-```
-POST /observations
-  -> ObservationCommand Lambda
-  -> ObservationSubmitted event
-  -> stored in events DynamoDB table
-  -> published to EventBridge
-```
-
-Projections build read models used by queries:
-```
-GET /alerts
-  -> QueryAlerts Lambda
-  -> alerts read model from DynamoDB
 ```
 
 # Installation

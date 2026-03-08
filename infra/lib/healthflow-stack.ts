@@ -188,6 +188,10 @@ export class HealthflowStack extends cdk.Stack {
     const login = api.root.addResource("login");
     login.addMethod("POST", new apigw.LambdaIntegration(authLambda));
 
+    // Authorization is disabled when running against LocalStack.
+    // Setting up API Gateway authorizers locally adds unnecessary
+    // complexity and provides little value for development.
+    // In real AWS deployments the Lambda authorizer is enabled.
     const useAuthorizer = !localstackEndpoint;
     const authOptions = useAuthorizer
       ? {
