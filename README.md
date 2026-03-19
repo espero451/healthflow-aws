@@ -2,6 +2,12 @@
 
 This project demonstrates a minimal event-driven backend architecture on AWS using serverless components. The entire stack runs locally using [LocalStack](https://github.com/localstack/localstack), allowing the system to be deployed and tested without accessing real AWS account.
 
+## Demo Video
+
+A short walkthrough of the system architecture and demo flow:
+
+[![HealthFlow AWS Demo](https://img.youtube.com/vi/m2BKqSzuIFc/0.jpg)](https://youtu.be/m2BKqSzuIFc)
+
 # Architecture
 
 Commands are handled by Lambda functions which generate **domain events**.
